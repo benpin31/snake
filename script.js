@@ -1,8 +1,109 @@
+/* various function */
+
+function positivMod(n, mod) {
+    // classic n%mod operator gives a negative number when n < 0. This function give a positive modulo in such cases .
+    return (n%mod+mod)%mod;
+}
+
+/* various object*/
+
+class freeGrid {
+    constructor(dimensions) {
+        let yTree = [];
+        for (let k = 0; k < dimensions[1]; k++) {
+            yTree.push(k)
+        }
+        this._freeGrid = [] ;
+        for (let k = 0; k < dimensions[0]; k++) {
+            this._freeGrid.push([k,yTree.slice()])
+        }
+    }
+
+    get freeGrid() {
+        return this._freeGrid;
+    }
+
+    findXCoordinate(xCoordinate) {
+        let xCpt = 0;
+
+        while (xCpt < this._freeGrid.length && xCoordinate !== this._freeGrid[xCpt][0]) {
+            xCpt++;
+        } 
+
+        if(xCpt === this._freeGrid.length) {
+            return [];
+        } else {
+            return([xCpt]) ;
+        }
+
+    }
+
+    findCoordinates(coordinates) {
+        let yCpt = 0;
+
+        let xCoordinate = this.findXCoordinate(coordinates[0])
+
+        if(xCoordinate.length === 0) {
+            return [];
+        } else {
+            while (yCpt < this._freeGrid[xCoordinate[0]][1].length && coordinates[1] != this._freeGrid[xCoordinate[0]][1][yCpt]) {
+                yCpt++;
+            }
+
+            if(yCpt === this._freeGrid[xCoordinate[0]][1].length) {
+                return xCoordinate;
+
+            }
+            else {
+                xCoordinate.push(yCpt)
+                return xCoordinate;
+            }
+        }
+    }
+
+    removeCoordinates(coordinates) {
+        let index = this.findCoordinates(coordinates) ;
+
+        if (index.length == 2) {
+            this._freeGrid[index[0]][1].splice(index[1], 1) ;
+            if (this._freeGrid[index[0]][1].length === 0) {
+                this._freeGrid.splice(index[0], 1) ;
+            }
+        }
+
+    }
+
+    addCoordinates(coordinates) {
+        let index = this.findCoordinates(coordinates) ;
+
+        if(index.length !== 2) {
+            if(index.length == 0) {
+                this._freeGrid.push([coordinates[0], [coordinates[1]]]) ;
+            } else {
+                this._freeGrid[index[0]][1].push(coordinates[1]) ;
+            }
+        }
+
+    }
+
+    chooseRandomCoordinates() {
+        let xRand = Math.floor(Math.random() * this._freeGrid.length);
+        let yRand = Math.floor(Math.random() * this._freeGrid[xRand][1].length);
+        return [this._freeGrid[xRand][0],this._freeGrid[xRand][1][yRand]] ;
+    }
+
+}
+
+
+
+
 /*  Object grid */
 
-class grid {
+class grid extends freeGrid {
     constructor(dimensions, applePosition) {
-        // all positions = [absciss, ordinate]
+        // all position = [absciss, ordinate]? More over, if a grid has dimension n,m, absisses corrdinates will be
+        // index from 0 to n-1 and ordinates from 0 to m-1. If fact the grid is a Z/nZ x Z/mZ grid
+        super(dimensions) ;
         this._dimensions = dimensions ;
         this._applePosition = applePosition ;
     }
@@ -24,10 +125,6 @@ class grid {
     }
 
     /*  */
-    isInGrid(position) {
-        return  position[0] > 0 && position[0] <= this._dimensions[0] &&
-                position[1] > 0 && position[1] <= this._dimensions[1] ; 
-    }
 
     isAnApple(position) {
         return position[0] === this._applePosition[0] && position[1] === this._applePosition[1];
@@ -42,8 +139,10 @@ class grid {
 class snake {
     /* constructor */
     constructor(direction, position) {
-        // all position = [absciss, ordinate]
+        // all position = [absciss, ordinate]? More over, if a grid has dimension n,m, absisses corrdinates will be
+        // index from 0 to n-1 and ordinates from 0 to m-1. If fact the grid is a Z/nZ x Z/mZ grid
         this._direction = direction ;
+        // N, S, E, W
         this._position = position ;
         // last element of position is the head of the snake
         this._isDead = false ;
@@ -92,22 +191,22 @@ class snake {
 
     /* Moving function */
 
-    nextHeadPosition() {
+    nextHeadPosition(gridInstance) {
         let nextHeadPosition ;
         let headPosition = this.getHeadPosition().slice();
 
         switch(this._direction) {
             case 'N':
-                nextHeadPosition = [headPosition[0], headPosition[1] + 1] ;
+                nextHeadPosition = [headPosition[0], positivMod(headPosition[1] + 1, gridInstance.dimensions[1])] ;
                 break;
             case 'S':
-                nextHeadPosition = [headPosition[0], headPosition[1] - 1] ;
+                nextHeadPosition = [headPosition[0], positivMod(headPosition[1] - 1, gridInstance.dimensions[1])] ;
                 break;
             case 'E':
-                nextHeadPosition = [headPosition[0] + 1, headPosition[1]] ;
+                nextHeadPosition = [positivMod(headPosition[0] + 1, gridInstance.dimensions[0]), headPosition[1]] ;
                 break ;
             case 'W':
-                nextHeadPosition = [headPosition[0] - 1, headPosition[1]] ;
+                nextHeadPosition = [positivMod(headPosition[0] - 1, gridInstance.dimensions[0]), headPosition[1]] ;
                 break ;
             default:
                 nextHeadPosition = headPosition ;
@@ -116,7 +215,7 @@ class snake {
         return nextHeadPosition
     }
 
-    static willCrashedOnHimself(nextPosition) {
+    static willCrashed(nextPosition) {
         let cpt = 0 ;
         let headPosition = nextPosition[nextPosition.length-1] ;
 
@@ -128,22 +227,15 @@ class snake {
         return cpt > 0;
     }
 
-    static willCrashed(nextPosition, gridInstance) {
-        let nextHeadPosition = nextPosition[nextPosition.length-1]        
-        return  !gridInstance.isInGrid(nextHeadPosition) || snake.willCrashedOnHimself(nextPosition) ;
-    }
-
     move(gridInstance) {
-        console.log(this._position) ;
-
-        let nextHeadPosition = this.nextHeadPosition() ;
+        let nextHeadPosition = this.nextHeadPosition(gridInstance) ;
         let nextPosition = this.copySnakePosition() ;
 
         if (gridInstance.isAnApple(nextHeadPosition)) {
             nextPosition.push(nextHeadPosition) ;
         } else {
             nextPosition.push(nextHeadPosition) ;
-            nextPosition = nextPosition.slice(1) ;
+            nextPosition.shift() ;
         }
 
         if (snake.willCrashed(nextPosition, gridInstance)) {
@@ -152,29 +244,34 @@ class snake {
             this._position = nextPosition ;
         }
 
-        console.log(this._position) ;
     }
 
+}
+
+class game {
+    constructor(dimensions) {
+        this._grid = new grid(dimensions, [floor(dimensions[0]/2), floor(dimensions[1]/2)]) ;
+        this._snake = new snake('E', [floor(dimensions[0]/2), floor(dimensions[1]/2)]) ;
+    }
 }
 
 
 /* main */
 
-let snakeInstance = new snake('W', [[5,5]]);//, [6,6], [5,6], [4,6], [4,5]]) ;
-let gridInstance = new grid([10,10], [4,5]) ;
+/*let snakeInstance = new snake('E', [[8,5]]);//, [6,6], [5,6], [4,6], [4,5]]) ;
+let gridInstance = new grid([10,10], [0,5]) ;
 
 /*a = snakeInstance.copySnakePosition() ;
 a[2] = 1;
 console.log(a)
 console.log(snakeInstance._position) ;*/
 
-//console.log(snakeInstance) ;
-snakeInstance.move(gridInstance);
-//console.log(snakeInstance) ;
 /*snakeInstance.move(gridInstance);
 console.log(snakeInstance) ;
 snakeInstance.move(gridInstance);
 console.log(snakeInstance) ;
+snakeInstance.move(gridInstance);
+console.log(snakeInstance) ;/*
 snakeInstance.move(gridInstance);
 console.log(snakeInstance) ;
 snakeInstance.move(gridInstance);
@@ -182,7 +279,7 @@ console.log(snakeInstance) ;
 snakeInstance.move(gridInstance);
 console.log(snakeInstance) ;*/
 
-a = [1,2,3,3] ;
+/*a = [1,2,3,3] ;
 cpt = 0 ;
 b = a[a.length-1];
 a.slice(0,a.length-1).forEach(element => {
@@ -190,4 +287,9 @@ a.slice(0,a.length-1).forEach(element => {
         cpt++
     }
 }) ;
-console.log(cpt)
+console.log(cpt)*/
+
+let a = new grid([5,5], [0,5]);
+console.log(a)
+a.removeCoordinates([0,2]) ; 
+console.log(a.freeGrid) ;
