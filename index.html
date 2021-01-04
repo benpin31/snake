@@ -5,27 +5,55 @@
     <meta charset="utf-8" />
     <title>toto</title>
     <link rel="stylesheet" href="./style.css" />
+    <link href="https://fonts.googleapis.com/css?family=Orbitron:700" rel="stylesheet"> 
 </head>
 
 <body>
-    <div id="user-interface">
+    <div id="game-interface">
         <div id="snake-grid">
             <canvas id="myCanvas"></canvas>
+            <div style="display:none;">
+                <img id="snake-right" src="https://www.dropbox.com/s/2i2ae4g7dbz0ypk/snake-right.png?raw=1">
+                <img id="snake-left" src="https://www.dropbox.com/s/0cn3vccmtstwmbc/snake-left.png?raw=1">
+                <img id="snake-up" src="https://www.dropbox.com/s/p68esjhm95gd6kb/snake-up.png?raw=1">
+                <img id="snake-down" src="https://www.dropbox.com/s/jpexud227o6g3gf/snake-down.png?raw=1">
+                <img id="boss-1" src="https://www.dropbox.com/s/pxox8zrqlx1v2id/boss-1.png?raw=1">
+                <img id="boss-2" src="https://www.dropbox.com/s/ifnwmn1026z4y6z/boss-2.png?raw=1">
+                <img id="boss-3" src="https://www.dropbox.com/s/aexs2f6cxnwrc0v/boss-3.png?raw=1">
+                <img id="left-arrow" src="https://www.dropbox.com/s/jxxvoxnsoojwm5b/left.png?raw=1">
+                <img id="right-arrow" src="https://www.dropbox.com/s/64qjnl0swpuo8wa/right.png?raw=1">
+                <img id="up-arrow" src="https://www.dropbox.com/s/nps5rp27u0xj687/up.png?raw=1">
+                <img id="down-arrow" src="https://www.dropbox.com/s/td9i8rn1vo43eii/down.png?raw=1">
+            </div>
             <script src="./script.js"></script>
         </div>
-        <div id="command">
-            <div>
-                <input class="button" type="button" value="N" onclick="onTheTop()" />
+        <div id="user-interface">
+            <div id="user-interface-left">
+                <div id="menu">
+                    <input class="button" type="button" value="New Game" onclick="newGame()" />
+                    <input class="button" type="button" value="Start Game" onclick="startGame()" />
+                    <input class="button" type="button" value="Stop" onclick="stop()" />
+                </div>
+                <div class="game-state">
+                    <span class="stat-name">Score</span> <span id="score-value"></span>  <br/>
+                    <span class="stat-name">Speed</span> <span id="speed"></span>                          
+                </div>
             </div>
-            <div>
-                <input class="button" type="button" value="W" onclick="toTheLeft()" />
-                <input class="button" type="button" value="E" onclick="toTheRight()" />
-            </div>
-            <div>
-                <input class="button" type="button" value="S" onclick="down()" />
+            <div id="command">
+                <div>
+                    <input class="cross" type="image" src="https://www.dropbox.com/s/nps5rp27u0xj687/up.png?raw=1" alt="up" onclick="onTheTop()" />
+                </div>
+                <div>
+                    <input class="cross" type="image" src = "https://www.dropbox.com/s/jxxvoxnsoojwm5b/left.png?raw=1" alt="left" onclick="toTheLeft()" />
+                    <input class="cross" type="image" src = "https://www.dropbox.com/s/64qjnl0swpuo8wa/right.png?raw=1" alt="right" onclick="toTheRight()" />
+                </div>
+                <div>
+                    <input class="cross" type="image" src="https://www.dropbox.com/s/td9i8rn1vo43eii/down.png?raw=1" alt="down"  onclick="down()" />
+                </div>
             </div>
         </div>
     </div>
+
 </body>
 
 </html>
