@@ -11,7 +11,11 @@
 <body>
     <div id="game-interface">
         <div id="snake-grid">
-            <canvas id="myCanvas"></canvas>
+            <div id="toto">            
+                <canvas id="canvas-pause"></canvas>
+                <canvas id="canvas-game"></canvas>
+            </div>
+
             <div style="display:none;">
                 <img id="snake-right" src="https://www.dropbox.com/s/2i2ae4g7dbz0ypk/snake-right.png?raw=1">
                 <img id="snake-left" src="https://www.dropbox.com/s/0cn3vccmtstwmbc/snake-left.png?raw=1">
@@ -25,14 +29,13 @@
                 <img id="up-arrow" src="https://www.dropbox.com/s/nps5rp27u0xj687/up.png?raw=1">
                 <img id="down-arrow" src="https://www.dropbox.com/s/td9i8rn1vo43eii/down.png?raw=1">
             </div>
-            <script src="./script.js"></script>
         </div>
         <div id="user-interface">
             <div id="user-interface-left">
                 <div id="menu">
                     <input class="button" type="button" value="New Game" onclick="newGame()" />
-                    <input class="button" type="button" value="Start Game" onclick="startGame()" />
-                    <input class="button" type="button" value="Stop" onclick="stop()" />
+                    <input class="button" type="button" value="Start Game" onclick="pressStart()" />
+                    <input class="button" type="button" value="Pause" onclick="stop()" />
                 </div>
                 <div class="game-state">
                     <span class="stat-name">Score</span> <span id="score-value"></span>  <br/>
@@ -53,7 +56,7 @@
             </div>
         </div>
     </div>
-
+    <script src="./script.js"></script>
 </body>
 
 </html>

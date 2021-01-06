@@ -45,8 +45,14 @@ html, body {
     justify-content: space-around;
 }
 
-#myCanvas {
+#canvas-game {
     background-color:#b2ceb240;
+    z-index: 1;
+}
+
+#canvas-pause {
+    position: absolute
+
 }
 
 #user-interface {
@@ -93,4 +99,8 @@ html, body {
 
 #menu {
     margin: 0 5%;
+}
+
+#toto {
+    position: relative ;
 }

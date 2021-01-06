@@ -143,9 +143,11 @@ class snake {
         // index from 0 to n-1 and ordinates from 0 to m-1. If fact the grid is a Z/nZ x Z/mZ grid
         this._direction = direction ;
         // N, S, E, W
+        this._stepDirection = direction;
         this._position = position ;
         // last element of position is the head of the snake
         this._isDead = false ;
+        this._diffAfterMove = {toDraw:position[0], toErase:[]};
     }
 
     /* getters and setters */
@@ -162,6 +164,10 @@ class snake {
         return this._isDead
     }
 
+    get diffAfterMove() {
+        return this._diffAfterMove
+    }
+
     getHeadPosition() {
         return(this._position[this._position.length-1])
     }
@@ -176,6 +182,10 @@ class snake {
 
     set isDead(isDead) {
         this._isDead = isDead ;
+    }
+
+    set diffAfterMove(diffAfterMove) {
+        this._diffAfterMove = diffAfterMove ;
     }
 
     /* Various */
@@ -234,20 +244,19 @@ class snake {
         let nextPosition = this.copySnakePosition() ;
 
         if (!this._isDead) {
-            optimAffichage.toDraw = nextHeadPosition ;
+            this.diffAfterMove.toDraw = nextHeadPosition ;
             gridInstance.removeFreeCoordinates(nextHeadPosition) ;
 
             if (gridInstance.isAnApple(nextHeadPosition)) {
-                optimAffichage.toErase = [] ;
+                this.diffAfterMove.toErase = [] ;
                 nextPosition.push(nextHeadPosition) ;
                 gridInstance.applePosition = gridInstance.chooseRandomFreeCoordinates() ;
-                if(gameState.speed > 100) {
-                    gameState.speed -= (gameState.speed-50)/((gameState.nbCells/4) ** 2)
-                    console.log(gameState.speed)
+                if(gameInstance.stepSpeed > gameInstance.maxSpeed) {
+                    gameInstance.stepSpeed -= (gameInstance.stepSpeed-gameInstance.maxSpeed)/((gameInstance.nbCells/4) ** 2)
+                    console.log(gameInstance.stepSpeed)
                 };
-                bossChoose.choice = Math.floor(Math.random() * 3) +1;
             } else {
-                optimAffichage.toErase = nextPosition[0] ;       
+                this.diffAfterMove.toErase = nextPosition[0] ;       
                 gridInstance.addFreeCoordinates(nextPosition[0]) ;
                 nextPosition.push(nextHeadPosition) ;
                 nextPosition.shift() ; 
@@ -255,45 +264,60 @@ class snake {
     
             if (snake.willCrashed(nextPosition, gridInstance)) {
                 this._isDead = true ;
-                optimAffichage.toDraw = this._position[this.position.length-1] ;
-                optimAffichage.toErase = [] ;  
+                this.diffAfterMove.toDraw = this._position[this.position.length-1] ;
+                this.diffAfterMove.toErase = [] ;  
             } else {
                 this._position = nextPosition ;
             }
 
+            this.stepDirection = this._direction;
+
         }
 
     }
-
 }
 
 class game {
-    constructor(dimensions) {
-        let snakePosition = [Math.floor(dimensions[0]/2), Math.floor(dimensions[1]/2)] ;
-
-        this._snake = new snake('E', [snakePosition]) ;
-
-        this._grid = new grid(dimensions, [0,0]) ;
-        snakePosition.forEach(pos => {
-            this._grid.removeFreeCoordinates(pos) ;
-        } )
+    constructor(nbCells, minSpeed, maxSpeed, snakeDirection) {
+        let gridDimension = [nbCells,nbCells] ;
+        let snakePosition = [Math.floor(gridDimension[0]/2), Math.floor(gridDimension[1]/2)] ;
+        this._snake = new snake(snakeDirection, [snakePosition]) ;
+        this._grid = new grid(gridDimension, [0,0]) ;
+        this._grid.removeFreeCoordinates(snakePosition) ;
         this._grid.applePosition = this._grid.chooseRandomFreeCoordinates() ;
-
+        this._stepSpeed = minSpeed;
+        this._maxSpeed = maxSpeed;
+        this._minSpeed = minSpeed;
         this._gameStatus = "gameOn" ;
+        this._nbCells = nbCells;
+        this._interval = [] ;
+        this._snakeSprite = {
+            left: document.getElementById("snake-left"),
+            right: document.getElementById("snake-right"),
+            up: document.getElementById("snake-up"),
+            down: document.getElementById("snake-down")
+        } ;
+        this._appleSpriteChoice = 1 ;
+        this._appleSprite = {
+            boss1: document.getElementById("boss-1"),
+            boss2: document.getElementById("boss-2"),
+            boss3: document.getElementById("boss-3")
+
+        }
+        this._unity = 0;
+
     }
 
-    newGame(dimensions) {
-        let snakePosition = [Math.floor(dimensions[0]/2), Math.floor(dimensions[1]/2)] ;
-
-        this._snake = new snake('E', [snakePosition]) ;
-
-        this._grid = new grid(dimensions, [0,0]) ;
-        snakePosition.forEach(pos => {
-            this._grid.removeFreeCoordinates(pos) ;
-        } )
+    newGame(snakeDirection) {
+        let gridDimension = [this.nbCells,this.nbCells] ;
+        let snakePosition = [Math.floor(gridDimension[0]/2), Math.floor(gridDimension[1]/2)] ;
+        this._snake = new snake(snakeDirection, [snakePosition]) ;
+        this._grid = new grid(gridDimension, [0,0]) ;
+        this._grid.removeFreeCoordinates(snakePosition) ;
         this._grid.applePosition = this._grid.chooseRandomFreeCoordinates() ;
-
-        this._gameStatus = "gameOn" ;    
+        this._stepSpeed = this.minSpeed;
+        this._gameStatus = "gameOn" ;
+        this._interval = [] ;
     }
 
     get grid() {
@@ -305,7 +329,67 @@ class game {
     }
 
     get gameStatus() {
-        return(this._gameStatus) ;
+        return this._gameStatus ;
+    }
+
+    get stepSpeed() {
+        return this._stepSpeed;
+    }
+
+    get maxSpeed() {
+        return this._maxSpeed ;
+    }
+
+    get minSpeed() {
+        return this._minSpeed ;
+    }
+
+    get nbCells() {
+        return this._nbCells ;
+    }
+
+    get interval() {
+        return this._interval ;
+    }
+
+    get snakeSprite() {
+        return this._snakeSprite ;
+    }
+
+    get appleSpriteChoice() {
+        return this._appleSpriteChoice ;
+    }
+
+    get appleSprite() {
+        return this._appleSprite ;
+    }
+
+    get unity() {
+        return this._unity ;
+    }
+
+    set maxSpeed(maxSpeed) {
+        this._maxSpeed = maxSpeed ;
+    }
+
+    set minSpeed(minSpeed) {
+        this._minSpeed = minSpeed ;
+    }
+
+    set nbCells(nbCells) {
+        this._nbCells = nbCells ;
+    }
+
+    set interval(interval) {
+        this._interval = interval ;
+    }
+
+    set stepSpeed(stepSpeed) {
+        this._stepSpeed = stepSpeed;
+    }
+
+    set unity(unity) {
+        this._unity = unity ;
     }
 
     setExecution() {
@@ -316,241 +400,223 @@ class game {
         } 
     }
 
-}
+    updateGridSize(ctx) {
+        let documentDimension={width:document.body.clientWidth, height:document.body.clientHeight } ;
+        this.unity = Math.min(documentDimension.width, documentDimension.height*0.8)/this.nbCells ;
+        document.getElementById("game-interface").style.width = this.nbCells*this.unity+"px";
 
-
-/* main */
-
-const unity = {unity:0};
-const optimAffichage = {toDraw:[], toErase:[]};
-
-const speed = 400;
-const gameState = {interval:[], speed: speed, nbCells:30}
-const gameInstance = new game([gameState.nbCells,gameState.nbCells]);
-
-const canvas = document.getElementById("myCanvas");
-const ctx = canvas.getContext("2d");
-
-const snakeLeft = document.getElementById("snake-left");
-const snakeRight = document.getElementById("snake-right");
-const snakeUp = document.getElementById("snake-up");
-const snakeDown = document.getElementById("snake-down");
-
-const boss1 = document.getElementById("boss-1");
-const boss2 = document.getElementById("boss-2");
-const boss3 = document.getElementById("boss-3");
-
-const bossChoose = {choice:1} ;
-
-function snakeSprite(game) {
-    let sprite ; 
-    switch(game.snake.direction) {
-        case 'N':
-            sprite = snakeUp ;
-            break;
-        case 'S':
-            sprite = snakeDown ;
-            break;
-        case 'E':
-            sprite = snakeRight ;
-            break;
-        case 'W':
-            sprite = snakeLeft ;
-            break;
-    }
-
-    return sprite ;
-}
-
-function bossSprite() {
-    let sprite ;
-    switch(bossChoose.choice) {
-        case 1:
-            sprite = boss1 ;
-            break ;
-        case 2:
-            sprite = boss2 ;
-            break ;
-        case 3:
-            sprite = boss3 ;
-            break ;
-    }
-
-    return sprite;
-}
-
-const roverSprite = document.getElementById("rover");
-
-function getUnity() {
+        ctx.canvas.width  = this.nbCells*this.unity;
+        ctx.canvas.height = this.nbCells*this.unity;
     
-    let documentDimension={width:document.body.clientWidth, height:document.body.clientHeight } ;
-  
-    unity.unity = Math.min(documentDimension.width, documentDimension.height*0.8)/gameState.nbCells
-    document.getElementById("game-interface").style.width = gameState.nbCells*unity.unity+"px";
+    }
+    
 
-}
-
-function UpdateGridSize(ctx, h, w) {
-    /* Draw the grid on wich the rover is moving */
-    ctx.canvas.width  = w;
-    ctx.canvas.height = h;
-}
-
-function drawImage(ctx,image, x, y, w, h, radian){
-    /* Improbe the drawImage function of canvasContect object allowing it to rotate and image */
-    ctx.save();
-    ctx.translate(x+w/2, y+h/2);
-    ctx.rotate(radian);
-    ctx.translate(-x-w/2, -y-h/2);
-    ctx.drawImage(image, x, y, w, h);
-    ctx.restore();
-} 
-
-function drawGame(ctx, game) {
-    let absciss ;
-    let ordinate ;
-
-    game.snake.position.forEach(position => {[game.snake.position.length-1] ;
-        ordinate= (game.grid.dimensions[1] - position[1]-1)*unity.unity ;
-        absciss = (position[0])*unity.unity ;
-        ctx.beginPath();
-        /*ctx.fillStyle = "black";
-        ctx.arc(absciss+unity.unity/2, ordinate+unity.unity/2, unity.unity/2.3, 0, 2 * Math.PI);
-    ctx.fill() */
-    drawImage(ctx,snakeSprite(game),absciss, ordinate, unity.unity,unity.unity, 0);}) 
-}
-
-function drawMove(ctx, game) {
+    drawGameStep(ctx) {
     /* plot rover sprite and obstacle given there position and direction (for rover) */
-    let absciss ;
-    let ordinate ;
+        let absciss ;
+        let ordinate ;
 
-    if (game.gameStatus !== "gameOver") {
-        if(optimAffichage.toDraw.length > 0) {
-            ordinate= (game.grid.dimensions[1] - optimAffichage.toDraw[1]-1)*unity.unity ;
-            absciss = (optimAffichage.toDraw[0])*unity.unity ;
-            ctx.beginPath();
-            /*ctx.fillStyle = "black";
-            ctx.arc(absciss+unity.unity/2, ordinate+unity.unity/2, unity.unity/2.3, 0, 2 * Math.PI);
-            ctx.fill()*/
-            drawImage(ctx,snakeSprite(game),absciss, ordinate, unity.unity,unity.unity, 0);
-            ; 
+        if (this.gameStatus !== "gameOver") {
+            if(this.snake.diffAfterMove.toDraw.length > 0) {
+                if(this.snake.diffAfterMove.toErase.length > 0) {
+                    ordinate= (this.grid.dimensions[1] - this.snake.diffAfterMove.toErase[1]-1)*this.unity ;
+                    absciss = (this.snake.diffAfterMove.toErase[0])*this.unity ;
+                    ctx.beginPath();
+                    ctx.clearRect(absciss, ordinate,this.unity, this.unity) ;
+                } else {
+                    this._appleSpriteChoice = Math.floor(Math.random() * 3) +1;
+                }
 
-            if(optimAffichage.toErase.length > 0) {
-                ordinate= (game.grid.dimensions[1] - optimAffichage.toErase[1]-1)*unity.unity ;
-                absciss = (optimAffichage.toErase[0])*unity.unity ;
+                ordinate= (this.grid.dimensions[1] - this.snake.diffAfterMove.toDraw[1]-1)*this.unity ;
+                absciss = (this.snake.diffAfterMove.toDraw[0])*this.unity ;
                 ctx.beginPath();
-                ctx.clearRect(absciss, ordinate,unity.unity, unity.unity) ;
-            }
-    
+                ctx.clearRect(absciss, ordinate,this.unity, this.unity) ;
+                ctx.drawImage(this.snakeSpriteAccordingDirection(),absciss, ordinate, this.unity,this.unity);
+                ; 
+        
+            } 
+        
+            ordinate= (this.grid.dimensions[1] - this.grid.applePosition[1]-1)*this.unity ;
+            absciss = (this.grid.applePosition[0])*this.unity ;
+            ctx.beginPath();
+            ctx.drawImage(this.chooseAppleSprite(),absciss, ordinate, this.unity,this.unity);
+
         } else {
-            drawGame(ctx, game)
+            gameOver() ;
         }
     
-        ordinate= (game.grid.dimensions[1] - game.grid.applePosition[1]-1)*unity.unity ;
-        absciss = (game.grid.applePosition[0])*unity.unity ;
-        ctx.beginPath();
-        /*ctx.fillStyle = "red";
-        ctx.arc(absciss+unity.unity/2, ordinate+unity.unity/2, unity.unity/2.3, 0, 2 * Math.PI);
-        ctx.fill()*/
-        console.log(bossChoose) ;
-        drawImage(ctx,bossSprite(),absciss, ordinate, unity.unity,unity.unity, 0);
-    } else {
-        gameOver() ;
-    }
- 
-    document.getElementById("score-value").innerHTML = gameInstance.snake.position.length;
-    document.getElementById("speed").innerHTML = Math.floor(1000/gameState.speed) + "moves/second" ;
+        document.getElementById("score-value").innerHTML = this.snake.position.length;
+        document.getElementById("speed").innerHTML = Math.floor(10000/this.stepSpeed)/10 + " moves/second" ;
 
-
-}
-
-
-function onTheTop() {
-    gameInstance.snake.direction = 'N';
-}
-
-function down() {
-    gameInstance.snake.direction = 'S';
-}
-
-function toTheLeft() {
-    gameInstance.snake.direction = 'W';
-}
-
-function toTheRight() {
-    gameInstance.snake.direction = 'E';
-}
-
-
-function whenRefresh() {
-    getUnity();
-    UpdateGridSize(ctx, gameState.nbCells*unity.unity, gameState.nbCells*unity.unity) ;
-    drawGame(ctx, gameInstance) ;
-    drawMove(ctx, gameInstance) ;
-    document.getElementById("score-value").innerHTML = gameInstance.snake.position.length;
-    document.getElementById("speed").innerHTML = Math.floor(10000/gameState.speed)/10 + " moves/second" ;
-
-}
-
-window.onload = whenRefresh;
-window.onresize = whenRefresh;
-
-
-function startGame() {
-    gameInstance.setExecution() ;
-    drawMove(ctx, gameInstance) ;
-
-    if(gameInstance.gameStatus !== "gameOver") {
-        gameState.interval = setTimeout(startGame, gameState.speed);
     }
 
+    snakeSpriteAccordingDirection() {
+        let sprite ; 
+        switch(this.snake.direction) {
+            case 'N':
+                sprite = this.snakeSprite.up ;
+                break;
+            case 'S':
+                sprite = this.snakeSprite.down ;
+                break;
+            case 'E':
+                sprite = this.snakeSprite.right ;
+                break;
+            case 'W':
+                sprite = this.snakeSprite.left ;
+                break;
+        }
+    
+        return sprite ;
+    }
+
+    chooseAppleSprite() {
+        let sprite ;
+        switch(this.appleSpriteChoice) {
+            case 1:
+                sprite = this.appleSprite.boss1 ;
+                break ;
+            case 2:
+                sprite = this.appleSprite.boss2 ;
+                break ;
+            case 3:
+                sprite = this.appleSprite.boss3 ;
+                break ;
+        }
+    
+        return sprite;
+    }
+
+
+
 }
+
+
+
+/* Interaction utilisateur */
+
+function newGame() {
+    canPressButton.start = true
+    clearTimeout(gameInstance.interval) ;
+    ctx.clearRect(0,0,ctx.canvas.width, ctx.canvas.height) ;
+    gameInstance.newGame('E');
+    gameInstance.drawGameStep(ctx) ;
+}
+
+const canPressButton = {new: true, start: true, pause: 0} ;
+
 
 function stop() {
-    clearTimeout(gameState.interval) ;
+
+    if(canPressButton.pause%2 === 0) {
+        clearTimeout(gameInstance.interval) ;
+        canPressButton.pause++;
+        ctx2.fillStyle = "#00000080";
+        ctx2.fillRect(0, 0, ctx2.canvas.width, ctx2.canvas.height);
+    } else {
+        canPressButton.pause++;
+        ctx2.clearRect(0, 0, ctx2.canvas.width, ctx2.canvas.height);
+        if (!canPressButton.start) {
+            activateGame() ;
+        }
+    }
 }
 
 function gameOver() {
     ctx.clearRect(0,0,ctx.canvas.width, ctx.canvas.height) ;
 }
 
-function newGame() {
-    clearTimeout(gameState.interval) ;
-    ctx.clearRect(0,0,ctx.canvas.width, ctx.canvas.height) ;
+function activateGame() {
+    gameInstance.setExecution() ;
+    gameInstance.drawGameStep(ctx) ;
 
-    gameState.interval = [] ;
-    gameState.speed = speed;
-    gameState.nbCells = 30;
-
-    optimAffichage.toDraw = [] ;
-    optimAffichage.toErase = [] ;
-
-    gameInstance.newGame([gameState.nbCells,gameState.nbCells]) ;
-
-    drawGame(ctx, gameInstance) ;
-    drawMove(ctx, gameInstance) ;
-}
-
-
-window.addEventListener('keydown',check,false);
-
-function check(e) {
-    var code = e.keyCode;
-    //Up arrow pressed
-    switch(code) {
-        case 37:
-            toTheLeft();
-            break;
-        case 38:
-            onTheTop();
-            break;
-        case 39:
-            toTheRight();
-            break;
-        case 40:
-            down();
-            break;
+    if(gameInstance.gameStatus !== "gameOver") {
+        gameInstance.interval = setTimeout(activateGame, gameInstance.stepSpeed);
     }
-    console.log(gameInstance.snake.direction)
 }
+
+function pressStart() {
+    if (canPressButton.start) {
+        canPressButton.start = false ;
+        activateGame() ;
+    }
+}
+
+function onTheTop() {
+    if(gameInstance.snake.stepDirection !== 'S') {
+        gameInstance.snake.direction = 'N';
+    }
+}
+
+function down() {
+    if(gameInstance.snake.stepDirection !== 'N') {
+        gameInstance.snake.direction = 'S';
+    }
+}
+
+function toTheLeft() {
+    if(gameInstance.snake.stepDirection !== 'E') {
+        gameInstance.snake.direction = 'W';
+    }
+}
+
+function toTheRight() {
+    if(gameInstance.snake.stepDirection !== 'W') {
+        gameInstance.snake.direction = 'E';
+    }}
+
+    window.addEventListener('keydown',check,false);
+
+    function check(e) {
+        var code = e.keyCode;
+        //Up arrow pressed
+        switch(code) {
+            case 37:
+                toTheLeft();
+                break;
+            case 38:
+                onTheTop();
+                break;
+            case 39:
+                toTheRight();
+                break;
+            case 40:
+                down();
+                break;
+        }
+    }
+
+function whenRefresh() {
+    gameInstance.updateGridSize(ctx) ;
+    gameInstance.drawGameStep(ctx) ;
+}
+
+window.onload = whenRefresh;
+window.onresize = whenRefresh;
+
+/* main */
+
+
+const canvasGame = document.getElementById("canvas-game");
+const canvasPause = document.getElementById("canvas-pause");
+const ctx = canvasGame.getContext("2d");
+const ctx2 = canvasPause.getContext("2d");
+
+
+const gameInstance = new game(20, 400, 50, 'E');
+gameInstance.updateGridSize(ctx);
+gameInstance.updateGridSize(ctx2) ;
+
+
+console.log(game.snakeSprite) ;
+
+
+
+
+
+
+
+
+
+
+
