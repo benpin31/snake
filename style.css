@@ -3,21 +3,20 @@
 * {
     margin: 0;
     padding: 0;
+    border: 0;
 }
 
 html, body {
     font-family: Roboto;
-    font-size: 1.3vh;
-    font-size: 1.3vh;
+    font-size: min(3vw, 2.5vh);
     height: 100vh;
     width: 100vw;
     background-image: url(https://www.dropbox.com/s/79pt9vavpzk6whl/metal-gear-font.jpg?raw=1);
-    background-position: right;
+    background-position: 75%;
     background-size: cover;
-    padding: 0;
     display: flex;
     justify-content: center;
-    color:#397975;
+    color:rgb(39, 79, 75);;
     font-family:  Orbitron, sans-serif ;
 }
 
@@ -25,34 +24,57 @@ html, body {
     height: 100vh;
     display:flex;
     flex-direction: column;
-    justify-content: flex-start;
-    margin: 0;
-    border: 0;
-    padding: 0;  
+    justify-content: center;
 }
 
 #command {
-    height:15vh;
+    height:20vh;
+    min-width: 20vh;
     display: flex;
-    width: 50%;
     flex-direction: column;
     justify-content: space-between;
-    margin-top: 1vh;
 }
 
-#command > div {
+.left-right-button {
+    width: 20vh;
+    height: 6.66vh;
     display: flex;
-    justify-content: space-around;
+    justify-content: space-between;
+}
+
+.left-right-button > input {
+    width: 6vh;
+    height: 6vh;
+}
+
+.up-down-button {
+    width: 100%;
+    height: 6.66vh;
+    display: flex;
+    justify-content: center;
+}
+
+.up-down-button > input {
+    width: 6vh;
+    height: 6vh;
+}
+
+#canvas-set {
+    width: 100%;
+    position: relative ;
 }
 
 #canvas-game {
     background-color:#b2ceb240;
+    margin: 0 0;
     z-index: 1;
+    display: block;
 }
 
 #canvas-pause {
-    position: absolute
-
+    width: 100%;
+    position: absolute;
+    display: block;
 }
 
 #user-interface {
@@ -61,11 +83,9 @@ html, body {
     justify-content: space-between;
     align-items: center;
     height: 100%;
+    max-height: 20vh;
 }
 
-#user-interface-left > div {
-    font-size: 2em;
-}
 
 #user-interface-left {
     width: 100%;
@@ -76,31 +96,44 @@ html, body {
 }
 
 #menu > .button {
-    width: 8em;
-    background-color: #397975;
+    width: 30%;
+    min-width: 15vh;
+    font-size: 1em;
+    height: 5vh;
+    background-color: rgb(39, 79, 75);
     color: rgb(27, 26, 26);
     border: 0;
-    margin: 0.4em;
+    margin: 1vh 0;
+    padding: 1vh 0;
     font-family:  Orbitron, sans-serif ;
+    outline: none;
 }
 
 .stat-name {
     display: inline-block; 
-    width: 30%;
+    align-content: center;
+    width: auto;
+  font-size: 1.2rem;
 }
 
 .cross {
     height: 2em;
+    outline: none;
 }
 
 .game-state {
     margin: 5%;
+    display: flex; 
+    justify-content: space-around;
 }
 
 #menu {
-    margin: 0 5%;
+    margin: 0 1vh;
+    display: flex;
+    justify-content: space-around;
+    flex-wrap: wrap;
 }
 
-#toto {
-    position: relative ;
+span {
+    padding: 0;
 }
