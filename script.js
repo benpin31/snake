@@ -526,9 +526,11 @@ class game {
         this.snake.move(this.grid);
         
         if (this.snake.ateAnApple) {
+            let nextSpeed = this.stepSpeed - (this.minSpeed-this.maxSpeed)/(this.nbCells*3);
             if(this.stepSpeed > this.maxSpeed) {
-                this.stepSpeed -= (this.stepSpeed-this.maxSpeed)/((this.nbCells/4) ** 2)
+                this.stepSpeed = nextSpeed ;
                 // if the snake eat an apple, the game accelerate
+              console.log(this.stepSpeed) ;
             };
         }
 
@@ -1007,7 +1009,7 @@ const ctx2 = canvasPause.getContext("2d");
 const ctxPad = canvasCrossPad.getContext('2d');
     // cross-pad interface
 
-const gameInstance = new game(20, 400, 50, 'E');
+const gameInstance = new game(15, 400, 50, 'E');
 gameInstance.updateGridSize(ctx);
 gameInstance.updateGridSize(ctx2);
 
