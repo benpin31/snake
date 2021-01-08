@@ -662,42 +662,88 @@ class game {
     This part gather all the function using for user interaction (press button, press keyboard key to whange snake sirection etc.)
 */
 
-const buttonRules = {new: false, start: false, pause: false} ;
+const buttonSwitch = {newGame: false, start: false, pause: false} ;
     /* there si three buttons. Pressing some of them will stop effetc of the others : for example, if i press start once, repressing 
     start has no effect anymore. The object buttonRules will be used to implement thoses rules. False mean non press, true mean press  */
 
+function changeButtonColorNewGame(isSwitch)  {
+    if (isSwitch) {
+        document.getElementById("new-game-button").style.backgroundColor = "rgb(39, 79, 75)"
+    } else {
+        document.getElementById("new-game-button").style.backgroundColor = "#03FB8D"
+        //#03FB8D
+    }
+}
+
+function changeButtonColorStart(isSwitch) {
+    if (isSwitch) {
+        document.getElementById("start-game-button").style.backgroundColor = "rgb(39, 79, 75)"
+    } else {
+        document.getElementById("start-game-button").style.backgroundColor = "#03FB8D"
+    }
+}
+
+function changeButtonColorPause(isSwitch) {
+    if (isSwitch) {
+        document.getElementById("pause-button").style.backgroundColor = "rgb(39, 79, 75)"
+    } else {
+        document.getElementById("pause-button").style.backgroundColor = "#03FB8D"
+    }
+}
+
 function newGame() {
-    buttonRules.start = false ;
-    buttonRules.pause = false ;
-    // when newgame, everything is set to 0, so user unpress all the buttons
-    clearTimeout(gameInstance.interval) ;
-    ctx.clearRect(0,0,ctx.canvas.width, ctx.canvas.height) ;
-    ctx2.clearRect(0, 0, ctx2.canvas.width, ctx2.canvas.height);
-    gameInstance.newGame('E');
-    gameInstance.drawGameStep(ctx) ;
+    if(!buttonRules.newGame) {
+        buttonRules.start = false ;
+        changeButtonColorStart(false) ;
+        buttonRules.pause = true ;
+        changeButtonColorPause(true) ;
+    
+        // when newgame, everything is set to 0, so user unpress all the buttons
+        clearTimeout(gameInstance.interval) ;
+        ctx.clearRect(0,0,ctx.canvas.width, ctx.canvas.height) ;
+        ctx2.clearRect(0, 0, ctx2.canvas.width, ctx2.canvas.height);
+        gameInstance.newGame('E');
+        gameInstance.drawGameStep(ctx) ;
+    
+        ctx2.clearRect(0,0,ctx2.canvas.width, ctx2.canvas.height) ;
+        ctx2.fillStyle = "#000000B0";
+        ctx2.fillRect(0, 0, ctx2.canvas.width, ctx2.canvas.height);
+        ctx2.strokeStyle = "#03FB8D";
+        ctx2.fillStyle = "#03FB8D";
+        ctx2.textAlign = "center";
+        ctx2.font = 'italic ' + ctx2.canvas.height/25 +'px Orbitron';
+        ctx2.fillText("Press Start Game to start", ctx2.canvas.width/2, ctx2.canvas.height/2-ctx2.canvas.height/15);
+        ctx2.fillText("Use pad or arrows keys to move", ctx2.canvas.width/2, ctx2.canvas.height/2+ctx2.canvas.height/15);
+    }
+
 }
 
 function pause() {
 
-    if (!gameInstance.snake.isDead) {
+    if (!gameInstance.snake.isDead & buttonRules.start) {
         // can't pause with a game over
         if (!buttonRules.pause) {
             // if button is not press, the game pause
             clearTimeout(gameInstance.interval) ;
             // stop the game
             buttonRules.pause = true;
+            changeButtonColorPause(true) ;
+            buttonRules.newGame = true;
+            changeButtonColorNewGame(true) ;
 
             // draw pause menu
             ctx2.fillStyle = "#000000B0";
             ctx2.fillRect(0, 0, ctx2.canvas.width, ctx2.canvas.height);
-            ctx.textAlign = "PAUSE";
-            ctx2.strokeStyle = "green";
+            ctx2.strokeStyle = "#03FB8D";
             ctx2.textAlign = "center";
             ctx2.font = 'italic ' + ctx2.canvas.height/8 +'px Orbitron';
             ctx2.strokeText("PAUSE", ctx2.canvas.width/2, ctx2.canvas.height/2);
         } else {
             // if button is not press, the game is launch again
             buttonRules.pause = false;
+            changeButtonColorPause(false) ;
+            buttonRules.newGame = false;
+            changeButtonColorNewGame(false) ;
             ctx2.clearRect(0, 0, ctx2.canvas.width, ctx2.canvas.height);
             if (buttonRules.start) {
                 activateGame() ;
@@ -714,14 +760,17 @@ function animGameOver() {
     ctx2.fillStyle = "rgb(0,0,0,"+(cpt+1)/420+")";
     ctx2.fillRect(0, 0, ctx2.canvas.width, ctx2.canvas.height);
     ctx.textAlign = "PAUSE";
-    ctx2.strokeStyle = "green";
+    ctx2.strokeStyle = "#03FB8D";
     ctx2.textAlign = "center";
     ctx2.font = 'italic ' + ctx2.canvas.height/8 +'px Orbitron';
     ctx2.strokeText("GAME OVER", ctx2.canvas.width/2, ctx2.canvas.height/2);
     cpt++ ;
     if (cpt < 420) {
         gameInstance.interval = setTimeout(animGameOver, 16);
-    }  
+    }  else {
+        buttonRules.newGame = false ;
+        changeButtonColorNewGame(false) ;
+    }
 }
 
 function gameOver() {
@@ -729,6 +778,14 @@ function gameOver() {
     cpt = 0
     clearTimeout(gameInstance.interval) ;
     gameInstance.sound.gameOver.play();
+
+    buttonRules.newGame = true ;
+    changeButtonColorNewGame(true) ;
+    buttonRules.start = true ;
+    changeButtonColorStart(true) ;
+    buttonRules.pause = true ;
+    changeButtonColorPause(true) ;
+
 
     animGameOver() ;
 }
@@ -745,7 +802,11 @@ function activateGame() {
 function pressStart() {
     if (!gameInstance.snake.isDead && !buttonRules.start && !buttonRules.pause) {
         // can't start the game is snake is dead, or if game already started, or if game is in pause
-        buttonRules.start = true ;
+        ctx2.clearRect(0,0,ctx2.canvas.width, ctx2.canvas.height) ;
+        buttonRules.start = false ;
+        changeButtonColorStart(false) ;
+        buttonRules.pause = false ;
+        changeButtonColorPause(false) ;
         activateGame() ;
     }
 }
@@ -801,12 +862,15 @@ function check(e) {
 
 /* when windows size modification, update the display of the game */
 
+
+
 function whenRefresh() {
     gameInstance.updateGridSize(ctx) ;
+    gameInstance.updateGridSize(ctx2) ;
     gameInstance.drawGameStep(ctx) ;
 }
 
-window.onload = whenRefresh;
+window.onload = newGame;
 window.onresize = whenRefresh;
 
 /* main */
@@ -822,7 +886,9 @@ const ctx2 = canvasPause.getContext("2d");
 
 const gameInstance = new game(20, 400, 50, 'E');
 gameInstance.updateGridSize(ctx);
-gameInstance.updateGridSize(ctx2) ;
+gameInstance.updateGridSize(ctx2);
+     // dont need to updgrade ctx2 size because its css width is 100%
+
 
 
 

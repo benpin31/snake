@@ -16,7 +16,7 @@ html, body {
     background-size: cover;
     display: flex;
     justify-content: center;
-    color:rgb(39, 79, 75);;
+    color:#03FB8D;
     font-family:  Orbitron, sans-serif ;
 }
 
@@ -72,7 +72,7 @@ html, body {
 }
 
 #canvas-pause {
-    width: 100%;
+    /*width: 100%;*/
     position: absolute;
     display: block;
 }
@@ -100,7 +100,7 @@ html, body {
     min-width: 15vh;
     font-size: 1em;
     height: 5vh;
-    background-color: rgb(39, 79, 75);
+    background-color: #03FB8D;
     color: rgb(27, 26, 26);
     border: 0;
     margin: 1vh 0;
