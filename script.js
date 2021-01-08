@@ -661,42 +661,99 @@ class game {
 
     This part gather all the function using for user interaction (press button, press keyboard key to whange snake sirection etc.)
 */
+ 
+class buttonState {
+    /*  manage button state : button doesn't refer to the effect they produce, but to the effect they have one over the other.
+        For example, button a is switch, pressing button a block pressing button b etc.*/
 
-const buttonSwitch = {newGame: false, start: false, pause: false} ;
-    /* there si three buttons. Pressing some of them will stop effetc of the others : for example, if i press start once, repressing 
-    start has no effect anymore. The object buttonRules will be used to implement thoses rules. False mean non press, true mean press  */
-
-function changeButtonColorNewGame(isSwitch)  {
-    if (isSwitch) {
-        document.getElementById("new-game-button").style.backgroundColor = "rgb(39, 79, 75)"
-    } else {
-        document.getElementById("new-game-button").style.backgroundColor = "#03FB8D"
-        //#03FB8D
+    constructor() {
+        this.newGame = {
+            interfaceButtonName: "new-game-button",
+            isSwitch: false,
+            isBlock: false
+        }
+        this.start = {
+            interfaceButtonName: "start-game-button",
+            isSwitch: false,
+            isBlock: false
+        }
+        this.pause = {
+            interfaceButtonName: "pause-button",
+            isSwitch: false,
+            isBlock: false
+        }
     }
-}
 
-function changeButtonColorStart(isSwitch) {
-    if (isSwitch) {
-        document.getElementById("start-game-button").style.backgroundColor = "rgb(39, 79, 75)"
-    } else {
-        document.getElementById("start-game-button").style.backgroundColor = "#03FB8D"
+    static buttonColor(button) {
+        if (button.isBlock) {
+            document.getElementById(button.interfaceButtonName).style.backgroundColor = darkGreen ;
+        } else {
+            document.getElementById(button.interfaceButtonName).style.backgroundColor = lightGreen ;
+        }
     }
-}
 
-function changeButtonColorPause(isSwitch) {
-    if (isSwitch) {
-        document.getElementById("pause-button").style.backgroundColor = "rgb(39, 79, 75)"
-    } else {
-        document.getElementById("pause-button").style.backgroundColor = "#03FB8D"
+    setInterfaceButtonColor() {
+        buttonState.buttonColor(this.newGame) ;
+        buttonState.buttonColor(this.start) ;
+        buttonState.buttonColor(this.pause) ;
     }
+
+    pressNewGameEffect() {
+        this.newGame.isSwitch = false ;
+        this.newGame.isBlock = false ;
+        this.start.isSwitch = false ;
+        this.start.isBlock = false ;        
+        this.pause.isSwitch = false ;
+        this.pause.isBlock = true ;
+        this.setInterfaceButtonColor() ;
+    }
+
+    pressStartEffect() {
+        this.newGame.isSwitch = false ;
+        this.newGame.isBlock = false ;
+        this.start.isSwitch = true ;
+        this.start.isBlock = true ;        
+        this.pause.isSwitch = false ;
+        this.pause.isBlock = false ;
+        this.setInterfaceButtonColor() ;
+    }
+
+    pressPauseEffect() {
+        if (!this.pause.isSwitch) {
+            this.newGame.isBlock = true ;
+            this.start.isBlock = true;        
+            this.pause.isSwitch = true ;
+            this.pause.isBlock = false ;
+        } else {
+            this.newGame.isBlock = false ;
+            if (!this.start.isSwitch) {this.start.isBlock = true} ;   
+                // we deblock pause only if game didn't start     
+            this.pause.isSwitch = false ;
+            this.pause.isBlock = false ;
+        }
+
+        this.setInterfaceButtonColor() ;
+    }
+
+    gameOverEffect(gameOverStep) {
+        if (gameOverStep === "begnining") {
+            this.newGame.isBlock = true ;
+            this.start.isBlock = true ;        
+            this.pause.isBlock = true ;
+        } else {
+            this.newGame.isBlock = false ;
+            this.start.isBlock = true ;        
+            this.pause.isBlock = true ;
+        }
+        this.setInterfaceButtonColor() ;
+    }
+
+    
 }
 
 function newGame() {
-    if(!buttonRules.newGame) {
-        buttonRules.start = false ;
-        changeButtonColorStart(false) ;
-        buttonRules.pause = true ;
-        changeButtonColorPause(true) ;
+    if(!buttonStateInstance.newGame.isBlock) {
+        buttonStateInstance.pressNewGameEffect()
     
         // when newgame, everything is set to 0, so user unpress all the buttons
         clearTimeout(gameInstance.interval) ;
@@ -708,8 +765,8 @@ function newGame() {
         ctx2.clearRect(0,0,ctx2.canvas.width, ctx2.canvas.height) ;
         ctx2.fillStyle = "#000000B0";
         ctx2.fillRect(0, 0, ctx2.canvas.width, ctx2.canvas.height);
-        ctx2.strokeStyle = "#03FB8D";
-        ctx2.fillStyle = "#03FB8D";
+        ctx2.strokeStyle = lightGreen;
+        ctx2.fillStyle = lightGreen;
         ctx2.textAlign = "center";
         ctx2.font = 'italic ' + ctx2.canvas.height/25 +'px Orbitron';
         ctx2.fillText("Press Start Game to start", ctx2.canvas.width/2, ctx2.canvas.height/2-ctx2.canvas.height/15);
@@ -720,32 +777,29 @@ function newGame() {
 
 function pause() {
 
-    if (!gameInstance.snake.isDead & buttonRules.start) {
+    if (!buttonStateInstance.pause.isBlock) {
         // can't pause with a game over
-        if (!buttonRules.pause) {
+        buttonStateInstance.pressPauseEffect() ;
+        if (buttonStateInstance.pause.isSwitch) {
             // if button is not press, the game pause
             clearTimeout(gameInstance.interval) ;
             // stop the game
-            buttonRules.pause = true;
-            changeButtonColorPause(true) ;
-            buttonRules.newGame = true;
-            changeButtonColorNewGame(true) ;
-
-            // draw pause menu
             ctx2.fillStyle = "#000000B0";
             ctx2.fillRect(0, 0, ctx2.canvas.width, ctx2.canvas.height);
-            ctx2.strokeStyle = "#03FB8D";
+            ctx2.strokeStyle = lightGreen;
             ctx2.textAlign = "center";
             ctx2.font = 'italic ' + ctx2.canvas.height/8 +'px Orbitron';
             ctx2.strokeText("PAUSE", ctx2.canvas.width/2, ctx2.canvas.height/2);
+            ctx2.font = 'italic ' + ctx2.canvas.height/20 +'px Orbitron';
+            ctx2.fillStyle = lightGreen;
+            ctx2.fillText("Press Pause again to unpause", ctx2.canvas.width/2, ctx2.canvas.height/2 + ctx2.canvas.height/8);
+
+            // draw pause menu
+
         } else {
             // if button is not press, the game is launch again
-            buttonRules.pause = false;
-            changeButtonColorPause(false) ;
-            buttonRules.newGame = false;
-            changeButtonColorNewGame(false) ;
             ctx2.clearRect(0, 0, ctx2.canvas.width, ctx2.canvas.height);
-            if (buttonRules.start) {
+            if (buttonStateInstance.start.isSwitch) {
                 activateGame() ;
             }
         }
@@ -760,16 +814,16 @@ function animGameOver() {
     ctx2.fillStyle = "rgb(0,0,0,"+(cpt+1)/420+")";
     ctx2.fillRect(0, 0, ctx2.canvas.width, ctx2.canvas.height);
     ctx.textAlign = "PAUSE";
-    ctx2.strokeStyle = "#03FB8D";
+    ctx2.strokeStyle = lightGreen;
     ctx2.textAlign = "center";
     ctx2.font = 'italic ' + ctx2.canvas.height/8 +'px Orbitron';
     ctx2.strokeText("GAME OVER", ctx2.canvas.width/2, ctx2.canvas.height/2);
     cpt++ ;
     if (cpt < 420) {
         gameInstance.interval = setTimeout(animGameOver, 16);
-    }  else {
-        buttonRules.newGame = false ;
-        changeButtonColorNewGame(false) ;
+    } else {
+        buttonStateInstance.gameOverEffect("end") ;
+        console.log(buttonStateInstance.start)
     }
 }
 
@@ -779,15 +833,10 @@ function gameOver() {
     clearTimeout(gameInstance.interval) ;
     gameInstance.sound.gameOver.play();
 
-    buttonRules.newGame = true ;
-    changeButtonColorNewGame(true) ;
-    buttonRules.start = true ;
-    changeButtonColorStart(true) ;
-    buttonRules.pause = true ;
-    changeButtonColorPause(true) ;
-
+    buttonStateInstance.gameOverEffect("begnining") ;
 
     animGameOver() ;
+
 }
 
 function activateGame() {
@@ -800,18 +849,60 @@ function activateGame() {
 }
 
 function pressStart() {
-    if (!gameInstance.snake.isDead && !buttonRules.start && !buttonRules.pause) {
+    if (!buttonStateInstance.start.isBlock) {
         // can't start the game is snake is dead, or if game already started, or if game is in pause
         ctx2.clearRect(0,0,ctx2.canvas.width, ctx2.canvas.height) ;
-        buttonRules.start = false ;
-        changeButtonColorStart(false) ;
-        buttonRules.pause = false ;
-        changeButtonColorPause(false) ;
+        buttonStateInstance.pressStartEffect() ;
+        console.log(buttonStateInstance.start)
         activateGame() ;
     }
 }
 
 /* function to move the snake */
+
+    /* Plot of the cross-pad */
+
+function drawPad() {
+    let crossWidth = document.getElementById("cross-pad-canvas").offsetWidth
+
+    ctxPad.canvas.width = crossWidth;
+    ctxPad.canvas.height = crossWidth;
+    
+    console.log(ctxPad.canvas.height)
+    
+    ctxPad.beginPath();
+    ctxPad.moveTo(crossWidth/3, crossWidth/3);
+    ctxPad.lineTo(2*crossWidth/3, crossWidth/3);
+    ctxPad.lineTo(3/2*crossWidth/3,0);
+    ctxPad.closePath();
+    ctxPad.fillStyle = lightGreen;
+    ctxPad.fill();
+    ctxPad.beginPath();
+    ctxPad.moveTo(2*crossWidth/3, crossWidth/3);
+    ctxPad.lineTo(2*crossWidth/3, 2*crossWidth/3);
+    ctxPad.lineTo(crossWidth,3/2*crossWidth/3);
+    ctxPad.closePath();
+    ctxPad.fillStyle =lightGreen;
+    ctxPad.fill();
+    ctxPad.beginPath();
+    ctxPad.moveTo(crossWidth/3, 2*crossWidth/3);
+    ctxPad.lineTo(2*crossWidth/3, 2*crossWidth/3);
+    ctxPad.lineTo(3/2*crossWidth/3,crossWidth);
+    ctxPad.closePath();
+    ctxPad.fillStyle = lightGreen;
+    ctxPad.fill();
+    ctxPad.beginPath();
+    ctxPad.moveTo(crossWidth/3, crossWidth/3);
+    ctxPad.lineTo(crossWidth/3, 2*crossWidth/3);
+    ctxPad.lineTo(0,3/2*crossWidth/3);
+    ctxPad.closePath();
+    ctxPad.fillStyle = lightGreen;
+    ctxPad.fill();
+}
+
+
+    /* Moving function */
+
 
 function onTheTop() {
     if(gameInstance.snake.stepDirection !== 'S') {
@@ -837,7 +928,29 @@ function toTheRight() {
     }
 }
 
-//  user keyboardket to move the snake
+    // move with the pad
+
+function checkPad(e) {
+    crossWidth = document.getElementById("cross-pad-canvas").offsetWidth
+    if(e.layerY > e.layerX) {
+        if(e.layerY > crossWidth-e.layerX) {
+            down() ;
+        } else {
+            toTheLeft() ;
+        }
+    } else {
+        if(e.layerY > crossWidth-e.layerX) {
+            toTheRight();
+        } else {
+            onTheTop();
+        }
+    }
+
+    console.log(e.layerX) ; console.log(e.layerY) ;console.log(crossWidth)
+}
+    
+
+    //  user keyboardket to move the snake
 
 window.addEventListener('keydown',check,false);
 
@@ -868,6 +981,10 @@ function whenRefresh() {
     gameInstance.updateGridSize(ctx) ;
     gameInstance.updateGridSize(ctx2) ;
     gameInstance.drawGameStep(ctx) ;
+
+    if (!buttonStateInstance.start.isSwitch) {
+        newGame() ;
+    }
 }
 
 window.onload = newGame;
@@ -875,24 +992,29 @@ window.onresize = whenRefresh;
 
 /* main */
 
+const darkGreen = "rgb(39, 79, 75)"
+const lightGreen = '#03FB8D'
+    // colors of the document
 
 const canvasGame = document.getElementById("canvas-game");
 const canvasPause = document.getElementById("canvas-pause");
+const canvasCrossPad = document.getElementById('cross-pad-canvas');
+
 const ctx = canvasGame.getContext("2d");
     // game interface
 const ctx2 = canvasPause.getContext("2d");
     // pause and game over interface
-
+const ctxPad = canvasCrossPad.getContext('2d');
+    // cross-pad interface
 
 const gameInstance = new game(20, 400, 50, 'E');
 gameInstance.updateGridSize(ctx);
 gameInstance.updateGridSize(ctx2);
-     // dont need to updgrade ctx2 size because its css width is 100%
 
+drawPad() ;
+canvasCrossPad.onclick = checkPad ;
 
-
-
-
+const buttonStateInstance = new buttonState();
 
 
 
