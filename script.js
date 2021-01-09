@@ -862,41 +862,41 @@ function pressStart() {
 
 /* function to move the snake */
 
-    /* Plot of the cross-pad */
+    /* Plot of the d-pad */
 
 function drawPad() {
-    let crossWidth = document.getElementById("cross-pad-canvas").offsetWidth
+    let dPadWidth = document.getElementById("d-pad-canvas").offsetWidth
 
-    ctxPad.canvas.width = crossWidth;
-    ctxPad.canvas.height = crossWidth;
+    ctxPad.canvas.width = dPadWidth;
+    ctxPad.canvas.height = dPadWidth;
     
     console.log(ctxPad.canvas.height)
     
     ctxPad.beginPath();
-    ctxPad.moveTo(crossWidth/3, crossWidth/3);
-    ctxPad.lineTo(2*crossWidth/3, crossWidth/3);
-    ctxPad.lineTo(3/2*crossWidth/3,0);
+    ctxPad.moveTo(dPadWidth/3, dPadWidth/3);
+    ctxPad.lineTo(2*dPadWidth/3, dPadWidth/3);
+    ctxPad.lineTo(3/2*dPadWidth/3,0);
     ctxPad.closePath();
     ctxPad.fillStyle = lightGreen;
     ctxPad.fill();
     ctxPad.beginPath();
-    ctxPad.moveTo(2*crossWidth/3, crossWidth/3);
-    ctxPad.lineTo(2*crossWidth/3, 2*crossWidth/3);
-    ctxPad.lineTo(crossWidth,3/2*crossWidth/3);
+    ctxPad.moveTo(2*dPadWidth/3, dPadWidth/3);
+    ctxPad.lineTo(2*dPadWidth/3, 2*dPadWidth/3);
+    ctxPad.lineTo(dPadWidth,3/2*dPadWidth/3);
     ctxPad.closePath();
     ctxPad.fillStyle =lightGreen;
     ctxPad.fill();
     ctxPad.beginPath();
-    ctxPad.moveTo(crossWidth/3, 2*crossWidth/3);
-    ctxPad.lineTo(2*crossWidth/3, 2*crossWidth/3);
-    ctxPad.lineTo(3/2*crossWidth/3,crossWidth);
+    ctxPad.moveTo(dPadWidth/3, 2*dPadWidth/3);
+    ctxPad.lineTo(2*dPadWidth/3, 2*dPadWidth/3);
+    ctxPad.lineTo(3/2*dPadWidth/3,dPadWidth);
     ctxPad.closePath();
     ctxPad.fillStyle = lightGreen;
     ctxPad.fill();
     ctxPad.beginPath();
-    ctxPad.moveTo(crossWidth/3, crossWidth/3);
-    ctxPad.lineTo(crossWidth/3, 2*crossWidth/3);
-    ctxPad.lineTo(0,3/2*crossWidth/3);
+    ctxPad.moveTo(dPadWidth/3, dPadWidth/3);
+    ctxPad.lineTo(dPadWidth/3, 2*dPadWidth/3);
+    ctxPad.lineTo(0,3/2*dPadWidth/3);
     ctxPad.closePath();
     ctxPad.fillStyle = lightGreen;
     ctxPad.fill();
@@ -933,22 +933,22 @@ function toTheRight() {
     // move with the pad
 
 function checkPad(e) {
-    crossWidth = document.getElementById("cross-pad-canvas").offsetWidth
+    dPadWidth = document.getElementById("d-pad-canvas").offsetWidth
     if(e.layerY > e.layerX) {
-        if(e.layerY > crossWidth-e.layerX) {
+        if(e.layerY > dPadWidth-e.layerX) {
             down() ;
         } else {
             toTheLeft() ;
         }
     } else {
-        if(e.layerY > crossWidth-e.layerX) {
+        if(e.layerY > dPadWidth-e.layerX) {
             toTheRight();
         } else {
             onTheTop();
         }
     }
 
-    console.log(e.layerX) ; console.log(e.layerY) ;console.log(crossWidth)
+    console.log(e.layerX) ; console.log(e.layerY) ;console.log(dPadWidth)
 }
     
 
@@ -1000,21 +1000,21 @@ const lightGreen = '#03FB8D'
 
 const canvasGame = document.getElementById("canvas-game");
 const canvasPause = document.getElementById("canvas-pause");
-const canvasCrossPad = document.getElementById('cross-pad-canvas');
+const canvasdPadPad = document.getElementById('d-pad-canvas');
 
 const ctx = canvasGame.getContext("2d");
     // game interface
 const ctx2 = canvasPause.getContext("2d");
     // pause and game over interface
-const ctxPad = canvasCrossPad.getContext('2d');
-    // cross-pad interface
+const ctxPad = canvasdPadPad.getContext('2d');
+    // d-pad interface
 
 const gameInstance = new game(15, 400, 50, 'E');
 gameInstance.updateGridSize(ctx);
 gameInstance.updateGridSize(ctx2);
 
 drawPad() ;
-canvasCrossPad.onclick = checkPad ;
+canvasdPadPad.onclick = checkPad ;
 
 const buttonStateInstance = new buttonState();
 

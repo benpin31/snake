@@ -35,7 +35,7 @@ html, body {
     justify-content: space-between;
 }
 
-#cross-pad-canvas {
+#d-pad-canvas {
     height: 100%;
     width: 100%;
   }
@@ -122,10 +122,10 @@ html, body {
   font-size: 1.2rem;
 }
 
-.cross {
+/*.cross {
     height: 2em;
     outline: none;
-}
+}*/
 
 .game-state {
     margin: 5%;
