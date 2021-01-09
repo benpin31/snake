@@ -526,7 +526,8 @@ class game {
         this.snake.move(this.grid);
         
         if (this.snake.ateAnApple) {
-            let nextSpeed = this.stepSpeed - (this.minSpeed-this.maxSpeed)/(this.nbCells*3);
+            let nextSpeed = 1000*this.stepSpeed/(1000+0.1*this.stepSpeed) ;
+            //this.stepSpeed - (this.minSpeed-this.maxSpeed)/(this.nbCells*3);
             if(this.stepSpeed > this.maxSpeed) {
                 this.stepSpeed = nextSpeed ;
                 // if the snake eat an apple, the game accelerate
