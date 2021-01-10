@@ -103,7 +103,7 @@ html, body {
 
 #menu > .button {
     width: 30%;
-    min-width: 15vh;
+    min-width: 10vh;
     font-size: 1em;
     height: 5vh;
     background-color: #03FB8D;
